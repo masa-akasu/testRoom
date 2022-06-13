@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<!-- このHTMLは本番用
+		scriptは外部ファイルが使えない
+		htmlは、xampp、phpで作り、十分テストした後、ここにコピーする
+		scriptのテストはこのファイルを更新する
+		VSCodeの折り畳み機能を十分に使う事
+	-->
+
+<head>
+	<meta charset="UTF-8">
+	<title>Surfing Judge System</title>
+</head>
+
+<body>
+
+	<h3>maintenance port (do not enter)</h3>
+	<!-- 発言フォーム -->
+	<form id="frm-post">
+		<input type="text" id="msg">
+		<button>送信</button>
+	</form>
+
+	<!-- 発言ログ -->
+	<ul id="msglist">
+	</ul>
+
+
+
+	<!--
+<script src="/socket.io/socket.io.js"></script>
+-->
+	<script src="https://cdn.socket.io/4.5.0/socket.io.min.js"
+		integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k"
+		crossorigin="anonymous"></script>
+	<script>
+		//-------------------------------------
+		// Socket.ioサーバへ接続
+		//-------------------------------------
+		const socket = io();
+    var s_time = null;
+		/**
+		 * [イベント] フォームが送信された    （自分からの）入力値の受信→サーバに送信
+		 */
+		document.querySelector("#frm-post").addEventListener("submit", (e) => {
+			//alert('33');
+			// 規定の送信処理をキャンセル(画面遷移しないなど)
+			e.preventDefault();
+
+			// 入力内容を取得する
+			const msg = document.querySelector("#msg");
+			if (msg.value === "") {
+				return (false);
+			}
+
+      s_time = new Date();
+			// Socket.ioサーバへ送信
+			socket.emit("post", { text: msg.value });
+
+			// 発言フォームを空にする
+			msg.value = "";
+
+
+
+		});
+
+		/**
+		 * [イベント] 誰かが発言した    （他人からの、および自分から）受信    どこに入れるかは自由
+		 */
+		socket.on("member-post", (msg) => {
+			//alert(msg.text);  //  そのもの
+			//console.log('2781 msg.text=', msg.text);
+			const list = document.querySelector("#msglist");
+			// const list = document.querySelector("msglist");  //NG
+			//alert(list);    //  [object HTMLUListElement]
+			const li = document.createElement("li");
+			//li.innerHTML = `${msg.text}`; //  下と同じ
+			li.innerHTML = msg.text;
+			list.insertBefore(li, list.firstChild);
+
+      var e_time = new Date();
+      var diff = e_time.getTime() - s_time.getTime();
+      console.log("経過時間(ミリ秒):", diff);       //  localでは3[ms]  globalでは200[ms]
+
+		});
+
+		/**
+		 * [イベント] ページの読込み完了    無くてもOK
+		 */
+		window.onload = () => {
+			// テキストボックスを選択する
+			//alert('69');
+			document.querySelector("#msg").focus();
+		}
+	</script>
+</body>
+
+</html>
