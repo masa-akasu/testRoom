@@ -53,12 +53,15 @@ app.get("/B", (req, res) => {
 
 var n=0;
 io.on("connection", (socket) => {
+
+  var room = '';
+  
   n += 1;
   console.log("user connected " , n);
 
   socket.on("post", (msg) => {
     //console.log(msg);           //  [text: 'xxxx']
-    io.emit("member-post", msg);
+    io.to(room).emit("member-post", msg);
   });
 
   socket.on('disconnect', function () {
@@ -66,6 +69,16 @@ io.on("connection", (socket) => {
     console.log('user disconnected ' , n);
   });
 
+  //  room_name を受け取る
+  socket.on("c2s_join", (msg) => {
+    console.log('71 room_name=', msg.text);           //  [text: 'xxxx']
+    room = msg.text;
+    socket.join(msg.text);
+
+    //io.emit("c2s_join", msg);
+  });
+  
+  
 });
 
 /**
@@ -73,5 +86,6 @@ io.on("connection", (socket) => {
  */
 //http.listen(3000, () => {
 http.listen( process.env.PORT || 3000, () => {
-    console.log("listening on *:3000");
+
+    console.log("listening on *:3000 " );
 });

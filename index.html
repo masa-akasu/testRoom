@@ -35,11 +35,24 @@
 		integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k"
 		crossorigin="anonymous"></script>
 	<script>
+
+    var room = "";
+    var ar = location.href.split('#');
+    if( ar.length >1 ){
+      console.log('39 location.href=', location.href.split('#')[1] );
+      room = location.href.split('#')[1];
+    }
+
+
 		//-------------------------------------
 		// Socket.ioサーバへ接続
 		//-------------------------------------
 		const socket = io();
     var s_time = null;
+
+    //  room名を送る  最初に１回だけ
+    socket.emit("c2s_join", { text: room });
+
 		/**
 		 * [イベント] フォームが送信された    （自分からの）入力値の受信→サーバに送信
 		 */
@@ -53,6 +66,8 @@
 			if (msg.value === "") {
 				return (false);
 			}
+
+
 
       s_time = new Date();
 			// Socket.ioサーバへ送信
